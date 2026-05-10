@@ -81,7 +81,7 @@ function LoginForm() {
   const [password, setPassword]   = useState('')
   const [error, setError]         = useState('')
   const [loading, setLoading]     = useState(false)
-  const [pwdReadOnly, setPwdRO]   = useState(true)
+  const [, setPwdRO]              = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
   const showDemo = searchParams.get('demo') === '1'
