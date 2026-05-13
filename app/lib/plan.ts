@@ -8,6 +8,6 @@ export function isPremium(plan: Plan | undefined | null): boolean {
   return plan === 'monthly' || plan === 'annual'
 }
 
-export function canAccessDifficulty(plan: Plan | undefined | null, d: Difficulty): boolean {
-  return isPremium(plan) || FREE_DIFFICULTIES.includes(d)
+export function canAccessDifficulty(_plan: Plan | undefined | null, _d: Difficulty): boolean {
+  return true
 }
