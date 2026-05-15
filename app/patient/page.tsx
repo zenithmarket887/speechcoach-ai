@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { Suspense, useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -273,7 +272,9 @@ function PatientApp() {
             >
               Historique
             </button>
-            {userIsPremium ? (
+            {/* Bouton Premium / portail abonnement : visible uniquement si l'utilisateur a un plan payant.
+                Le CTA "Premium" pour les non-abonnés est masqué tant que les verrous Premium sont désactivés. */}
+            {userIsPremium && (
               <button
                 onClick={openPortal}
                 disabled={portalLoading}
@@ -292,37 +293,23 @@ function PatientApp() {
                 </svg>
                 {portalLoading ? '…' : (plan === 'annual' ? 'Annuel' : 'Mensuel')}
               </button>
-            ) : (
-              <Link
-                href="/#tarifs"
-                aria-label="Passer Premium"
+            )}
+            {/* Bouton Déconnexion masqué tant que l'auth est désactivée (signOut redirigerait vers /login → /patient, donc inutile).
+                Visible uniquement si une session existe. */}
+            {session && (
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                aria-label="Déconnexion"
                 style={{
-                  background: '#1E5BB8', border: '1.5px solid #1E5BB8',
+                  background: 'transparent', border: '1.5px solid #D6DEEA',
                   borderRadius: 8, padding: '5px 10px',
-                  color: '#FFFFFF', fontSize: 13, fontWeight: 700,
+                  color: '#5B6B82', fontSize: 13, fontWeight: 600,
                   cursor: 'pointer', minHeight: 32,
-                  display: 'inline-flex', alignItems: 'center', gap: 5,
-                  textDecoration: 'none',
                 }}
               >
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="#FFD86B"/>
-                </svg>
-                Premium
-              </Link>
+                Déco.
+              </button>
             )}
-            <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
-              aria-label="Déconnexion"
-              style={{
-                background: 'transparent', border: '1.5px solid #D6DEEA',
-                borderRadius: 8, padding: '5px 10px',
-                color: '#5B6B82', fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', minHeight: 32,
-              }}
-            >
-              Déco.
-            </button>
           </div>
         </div>
 
@@ -428,6 +415,32 @@ function PatientApp() {
         {/* ════════════ RECORDING ════════════ */}
         {appState === 'recording' && (
           <>
+            {/* Bouton retour vers la sélection du texte */}
+            <div>
+              <button
+                onClick={() => {
+                  setTranscription(null)
+                  setAudioBlob(null)
+                  setError(null)
+                  setAppState('setup')
+                  setSetupStep('texte')
+                }}
+                aria-label="Revenir à la sélection du texte"
+                style={{
+                  background: '#FFFFFF', border: '1.5px solid #D6DEEA',
+                  borderRadius: 999, padding: '8px 16px',
+                  fontSize: 14, fontWeight: 600, color: '#324158',
+                  cursor: 'pointer', minHeight: 38,
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Changer de texte
+              </button>
+            </div>
+
             <div style={{ textAlign: 'center' }}>
               <h1 style={{
                 fontFamily: 'var(--font-fraunces), Fraunces, Georgia, serif',

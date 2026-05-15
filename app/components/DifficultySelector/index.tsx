@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { DIFFICULTIES, EXERCISES, type Difficulty, type Exercise } from '@/app/lib/exercises'
-import { canAccessDifficulty, isPremium } from '@/app/lib/plan'
+import { canAccessDifficulty } from '@/app/lib/plan'
 
 /* ══════════════════════════════════════════
    Props
@@ -150,7 +149,6 @@ function TTSBtn({ text }: { text: string }) {
 export default function DifficultySelector({ step, onStepChange, onSelect }: DifficultySelectorProps) {
   const { data: session } = useSession()
   const plan = session?.user.plan ?? 'free'
-  const userIsPremium = isPremium(plan)
 
   const [difficulty, setDifficulty]       = useState<Difficulty>('debutant')
   const [selectedExercise, setSelectedEx] = useState<Exercise>(EXERCISES.debutant[0])
@@ -241,29 +239,8 @@ export default function DifficultySelector({ step, onStepChange, onSelect }: Dif
             })}
           </div>
 
-          {!userIsPremium && (
-            <div style={{
-              marginTop: 14, padding: '12px 14px',
-              background: '#E5EEFB', border: '1.5px solid #1E5BB8',
-              borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10,
-              flexWrap: 'wrap',
-            }}>
-              <span style={{ fontSize: 14, color: '#103E85', fontWeight: 600, flex: 1, minWidth: 200 }}>
-                Débloquez les niveaux Soutenu, Exigeant et Maîtrise + l’analyse expressive.
-              </span>
-              <Link
-                href="/#tarifs"
-                style={{
-                  padding: '6px 14px', borderRadius: 10,
-                  background: '#1E5BB8', color: '#FFFFFF',
-                  fontSize: 13, fontWeight: 700, textDecoration: 'none',
-                  boxShadow: '0 3px 0 #103E85',
-                }}
-              >
-                Voir les tarifs →
-              </Link>
-            </div>
-          )}
+          {/* Bannière "Débloquez les niveaux Soutenu/Exigeant/Maîtrise" masquée
+              tant que les verrous Premium sont désactivés (cf. canAccessDifficulty). */}
         </div>
 
         {/* Bouton Continuer — sur fond gris, hors carte */}
