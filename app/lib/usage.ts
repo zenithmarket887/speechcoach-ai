@@ -3,9 +3,9 @@ import { supabase } from './supabase'
 // Tarifs publics (USD) — vérifier sur les sites officiels et ajuster si besoin
 // https://www.anthropic.com/pricing  ·  https://elevenlabs.io/pricing  ·  https://hume.ai/pricing
 export const PRICING = {
-  claude_opus: {
-    input_per_million:  15.0,
-    output_per_million: 75.0,
+  claude_haiku: {
+    input_per_million:  1.0,
+    output_per_million: 5.0,
   },
   elevenlabs_scribe: {
     per_minute: 0.40 / 60,
@@ -39,8 +39,8 @@ export async function recordUsage(entry: Omit<UsageEntry, 'timestamp'>): Promise
 
 export function costClaude(inputTokens: number, outputTokens: number): number {
   return (
-    (inputTokens  * PRICING.claude_opus.input_per_million  +
-     outputTokens * PRICING.claude_opus.output_per_million) / 1_000_000
+    (inputTokens  * PRICING.claude_haiku.input_per_million  +
+     outputTokens * PRICING.claude_haiku.output_per_million) / 1_000_000
   )
 }
 
@@ -60,7 +60,7 @@ export type UsageSummary = {
 }
 
 export async function getUsageSummary(): Promise<UsageSummary> {
-  const { data, error } = await supabase.from('api_usage').select('*')
+  const { data, error } = await supabase.from('api_usage').select('*').range(0, 9999)
 
   if (error || !data) {
     return { total_usd: 0, session_count: 0, by_provider: { claude: 0, elevenlabs: 0, hume: 0 }, last_entries: [] }

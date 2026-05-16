@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     await recordUsage({
       provider: 'claude',
       detail: {
-        model: 'claude-opus-4-5',
+        model: 'claude-haiku-4-5',
         difficulty: d,
         input_tokens:  usage.input_tokens,
         output_tokens: usage.output_tokens,
