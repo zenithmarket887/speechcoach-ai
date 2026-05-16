@@ -12,9 +12,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Texte trop court ou manquant' }, { status: 400 })
     }
 
-    const analysis = await analyzeTranscription(text, d, exerciseText || null)
+    const { analysis, usage } = await analyzeTranscription(text, d, exerciseText || null)
 
-    const usage = analysis._usage ?? { input_tokens: 0, output_tokens: 0 }
     const cost = costClaude(usage.input_tokens, usage.output_tokens)
     await recordUsage({
       provider: 'claude',
@@ -27,8 +26,7 @@ export async function POST(request: NextRequest) {
       cost_usd: cost,
     })
 
-    const { _usage, ...publicAnalysis } = analysis
-    return NextResponse.json({ ...publicAnalysis, cost_usd: cost })
+    return NextResponse.json({ ...analysis, cost_usd: cost })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur analyse'
     console.error('ANALYZE ERROR:', err)
