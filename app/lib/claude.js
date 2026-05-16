@@ -100,5 +100,12 @@ RÈGLES :
 
   const raw = message.content[0].text.trim()
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
-  return JSON.parse(cleaned)
+  const parsed = JSON.parse(cleaned)
+  return {
+    ...parsed,
+    _usage: {
+      input_tokens:  message.usage?.input_tokens  ?? 0,
+      output_tokens: message.usage?.output_tokens ?? 0,
+    },
+  }
 }

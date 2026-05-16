@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/lib/auth'
 import { analyzeExpressivity } from '@/app/lib/hume'
+import { recordUsage, costHume, estimateAudioSeconds } from '@/app/lib/usage'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Non connecté.' }, { status: 401 })
-    }
-    if (session.user.plan === 'free') {
-      return NextResponse.json(
-        { error: 'L’analyse expressive est réservée aux plans Mensuel et Annuel.', upgrade: true },
-        { status: 402 },
-      )
-    }
-
     if (!process.env.HUME_API_KEY) {
       return NextResponse.json({ error: 'HUME_API_KEY non configurée' }, { status: 503 })
     }
@@ -29,7 +17,16 @@ export async function POST(request: NextRequest) {
 
     const buffer = await audio.arrayBuffer()
     const result = await analyzeExpressivity(buffer, audio.type || 'audio/webm')
-    return NextResponse.json(result)
+
+    const seconds = estimateAudioSeconds(buffer.byteLength)
+    const cost = costHume(seconds)
+    await recordUsage({
+      provider: 'hume',
+      detail: { model: 'prosody', seconds, audio_bytes: buffer.byteLength },
+      cost_usd: cost,
+    })
+
+    return NextResponse.json({ ...result, cost_usd: cost })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur analyse expressivité'
     console.error('HUME ERROR:', err)

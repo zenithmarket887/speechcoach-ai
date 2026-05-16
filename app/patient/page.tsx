@@ -11,6 +11,7 @@ import Feedback from '@/app/components/Feedback'
 import DifficultySelector from '@/app/components/DifficultySelector'
 import ExpressivityScore from '@/app/components/ExpressivityScore'
 import GameReward from '@/app/components/GameReward'
+import CostBadge from '@/app/components/CostBadge'
 import { DIFFICULTIES, type Difficulty, type Exercise } from '@/app/lib/exercises'
 import { saveSession, getPatientSessions, type SpeechSession } from '@/app/lib/sessionStorage'
 import {
@@ -148,6 +149,7 @@ function PatientApp() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur analyse')
       setAnalysis(data)
+      window.dispatchEvent(new Event('usage-updated'))
 
       if (session?.user) {
         const newSession: SpeechSession = {
@@ -181,7 +183,10 @@ function PatientApp() {
           .then((r) => r.json())
           .then((hume) => { if (hume && !hume.error) setExpressivity(hume) })
           .catch(() => {})
-          .finally(() => setHumeLoading(false))
+          .finally(() => {
+            setHumeLoading(false)
+            window.dispatchEvent(new Event('usage-updated'))
+          })
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue')
@@ -260,6 +265,7 @@ function PatientApp() {
                 {gamificationState.streak}j
               </div>
             )}
+            <CostBadge />
             <button
               onClick={handleShowHistory}
               aria-label="Historique"
