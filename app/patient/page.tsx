@@ -11,7 +11,6 @@ import Feedback from '@/app/components/Feedback'
 import DifficultySelector from '@/app/components/DifficultySelector'
 import ExpressivityScore from '@/app/components/ExpressivityScore'
 import GameReward from '@/app/components/GameReward'
-import CostBadge from '@/app/components/CostBadge'
 import { DIFFICULTIES, type Difficulty, type Exercise } from '@/app/lib/exercises'
 import { saveSession, getPatientSessions, type SpeechSession } from '@/app/lib/sessionStorage'
 import {
@@ -265,7 +264,6 @@ function PatientApp() {
                 {gamificationState.streak}j
               </div>
             )}
-            <CostBadge />
             <button
               onClick={handleShowHistory}
               aria-label="Historique"
