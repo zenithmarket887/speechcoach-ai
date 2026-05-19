@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/app/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/sessions/all  — pour le dashboard orthophoniste
 export async function GET() {
   const { data, error } = await supabase
