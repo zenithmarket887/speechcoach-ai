@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { DIFFICULTIES, EXERCISES, type Difficulty, type Exercise } from '@/app/lib/exercises'
+import { DIFFICULTIES, EXERCISES, stripEmphasis, type Difficulty, type Exercise } from '@/app/lib/exercises'
 import { canAccessDifficulty } from '@/app/lib/plan'
 
 /* ══════════════════════════════════════════
@@ -121,7 +121,7 @@ function TTSBtn({ text }: { text: string }) {
         e.stopPropagation()
         if ('speechSynthesis' in window) {
           window.speechSynthesis.cancel()
-          const u = new SpeechSynthesisUtterance(text)
+          const u = new SpeechSynthesisUtterance(stripEmphasis(text))
           u.lang = 'fr-FR'
           window.speechSynthesis.speak(u)
         }

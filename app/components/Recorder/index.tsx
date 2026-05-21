@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 type RecorderState = 'idle' | 'recording' | 'processing'
 
@@ -14,6 +14,7 @@ interface RecorderProps {
   onTranscription: (text: string) => void
   onAudioReady?: (blob: Blob) => void
   onError: (message: string) => void
+  onStateChange?: (state: RecorderState) => void
 }
 
 function getMicError(err: unknown): MicError {
@@ -28,13 +29,15 @@ function formatDuration(s: number) {
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
 
-export default function Recorder({ onTranscription, onAudioReady, onError }: RecorderProps) {
+export default function Recorder({ onTranscription, onAudioReady, onError, onStateChange }: RecorderProps) {
   const [state, setState]         = useState<RecorderState>('idle')
   const [duration, setDuration]   = useState(0)
   const [micError, setMicError]   = useState<MicError | null>(null)
   const mediaRecorderRef          = useRef<MediaRecorder | null>(null)
   const chunksRef                 = useRef<Blob[]>([])
   const timerRef                  = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => { onStateChange?.(state) }, [state, onStateChange])
 
   const startRecording = async () => {
     setMicError(null)

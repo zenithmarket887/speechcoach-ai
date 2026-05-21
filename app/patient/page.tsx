@@ -6,12 +6,13 @@ import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { isPremium } from '@/app/lib/plan'
 import Recorder from '@/app/components/Recorder'
+import RhythmText from '@/app/components/RhythmText'
 import Score from '@/app/components/Score'
 import Feedback from '@/app/components/Feedback'
 import DifficultySelector from '@/app/components/DifficultySelector'
 import ExpressivityScore from '@/app/components/ExpressivityScore'
 import GameReward from '@/app/components/GameReward'
-import { DIFFICULTIES, type Difficulty, type Exercise } from '@/app/lib/exercises'
+import { DIFFICULTIES, stripEmphasis, type Difficulty, type Exercise } from '@/app/lib/exercises'
 import { saveSession, getPatientSessions, type SpeechSession } from '@/app/lib/sessionStorage'
 import {
   getGamificationState,
@@ -116,6 +117,7 @@ function PatientApp() {
   const [history, setHistory] = useState<SpeechSession[]>([])
   const [gamificationState, setGamificationState] = useState<GamificationState | null>(null)
   const [sessionReward, setSessionReward] = useState<SessionReward | null>(null)
+  const [recorderState, setRecorderState] = useState<'idle' | 'recording' | 'processing'>('idle')
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -143,7 +145,7 @@ function PatientApp() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: transcription, difficulty, exerciseText: exercise?.text ?? null }),
+        body: JSON.stringify({ text: transcription, difficulty, exerciseText: exercise ? stripEmphasis(exercise.text) : null }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur analyse')
@@ -475,7 +477,7 @@ function PatientApp() {
                     onClick={() => {
                       if ('speechSynthesis' in window) {
                         window.speechSynthesis.cancel()
-                        const u = new SpeechSynthesisUtterance(exercise.text)
+                        const u = new SpeechSynthesisUtterance(stripEmphasis(exercise.text))
                         u.lang = 'fr-FR'
                         window.speechSynthesis.speak(u)
                       }
@@ -495,15 +497,25 @@ function PatientApp() {
                     </svg>
                   </button>
                 </div>
-                <p style={{ margin: 0, fontSize: 18, lineHeight: 1.75, color: '#0E1B2C', fontWeight: 500 }}>
-                  {exercise.text}
-                </p>
+                <RhythmText
+                  text={exercise.text}
+                  wordDurationMs={460}
+                  active={difficulty === 'elementaire' && recorderState === 'recording'}
+                />
+                {difficulty === 'elementaire' && recorderState === 'idle' && (
+                  <p style={{
+                    margin: '12px 0 0', fontSize: 13, color: '#5B6B82',
+                    fontStyle: 'italic', textAlign: 'center',
+                  }}>
+                    Le rythme défilera sur chaque mot dès le début de l’enregistrement.
+                  </p>
+                )}
               </div>
             )}
 
             {/* Enregistreur */}
             <div style={{ background: '#FFFFFF', border: '1.5px solid #D6DEEA', borderRadius: 18, padding: '40px 28px', boxShadow: '0 2px 4px rgba(14,27,44,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Recorder onTranscription={handleTranscription} onAudioReady={handleAudioReady} onError={setError} />
+              <Recorder onTranscription={handleTranscription} onAudioReady={handleAudioReady} onError={setError} onStateChange={setRecorderState} />
 
               {error && (
                 <div style={{

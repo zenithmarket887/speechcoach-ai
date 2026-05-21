@@ -8,6 +8,10 @@ export interface Exercise {
   focus: string
 }
 
+export function stripEmphasis(text: string): string {
+  return text.replace(/\*\*([^*]+)\*\*/g, '$1')
+}
+
 export const DIFFICULTIES: Record<Difficulty, { label: string; color: string; description: string; scoringNote: string }> = {
   debutant: {
     label: 'Doux',
@@ -83,36 +87,36 @@ export const EXERCISES: Record<Difficulty, Exercise[]> = {
     {
       id: 'e1',
       title: 'Le marché',
-      text: 'Chaque samedi matin, je vais au marché du village. Les stands sont colorés et bien garnis. Je choisis des fruits frais, des légumes de saison et parfois du fromage local. Les commerçants sont aimables et je m\'arrête souvent pour discuter avec eux.',
-      tip: 'Respectez les virgules comme des pauses courtes.',
+      text: 'Chaque **samedi** matin, je vais au **marché** du village. Les stands sont **colorés** et bien garnis. Je choisis des **fruits frais**, des **légumes** de saison et parfois du **fromage** local. Les commerçants sont **aimables** et je m\'arrête souvent pour discuter avec eux.',
+      tip: 'Respectez les virgules comme des pauses courtes. Les mots en jaune marquent les temps forts.',
       focus: 'Ponctuation parlée',
     },
     {
       id: 'e2',
       title: 'Mon métier',
-      text: 'Je travaille dans un bureau en ville. Chaque matin, je prends le bus ou le métro. Mes collègues sont sympathiques et compétents. Nous travaillons ensemble sur des projets variés. Le soir, je rentre chez moi fatigué mais satisfait de ma journée.',
-      tip: 'Gardez une voix claire et audible du début à la fin.',
+      text: 'Je **travaille** dans un bureau en ville. Chaque matin, je prends le **bus** ou le **métro**. Mes collègues sont **sympathiques** et **compétents**. Nous travaillons **ensemble** sur des projets variés. Le soir, je rentre chez moi **fatigué** mais **satisfait** de ma journée.',
+      tip: 'Gardez une voix claire et audible du début à la fin. Les mots en jaune marquent les temps forts.',
       focus: 'Volume constant',
     },
     {
       id: 'e3',
       title: 'Le sport',
-      text: 'Faire du sport est important pour rester en bonne santé. Je fais du jogging trois fois par semaine dans le parc. Je nage aussi le dimanche matin à la piscine municipale. L\'exercice régulier améliore l\'humeur et donne de l\'énergie pour toute la journée.',
-      tip: 'Évitez de monter la voix à la fin des phrases déclaratives.',
+      text: 'Faire du **sport** est **important** pour rester en bonne santé. Je fais du **jogging** trois fois par semaine dans le parc. Je nage aussi le dimanche matin à la **piscine** municipale. L\'exercice **régulier** améliore l\'humeur et donne de l\'**énergie** pour toute la journée.',
+      tip: 'Évitez de monter la voix à la fin des phrases déclaratives. Les mots en jaune marquent les temps forts.',
       focus: 'Intonation descendante',
     },
     {
       id: 'e4',
       title: 'Les saisons',
-      text: 'Le printemps est la saison du renouveau. Les fleurs s\'épanouissent et les oiseaux reviennent. L\'été apporte chaleur et lumière. L\'automne habille les forêts de couleurs chaudes. L\'hiver, enfin, invite au repos et à la contemplation sous la neige.',
-      tip: 'Variez votre ton selon le sentiment de chaque phrase.',
+      text: 'Le **printemps** est la saison du **renouveau**. Les **fleurs** s\'épanouissent et les **oiseaux** reviennent. L\'**été** apporte chaleur et lumière. L\'**automne** habille les forêts de couleurs chaudes. L\'**hiver**, enfin, invite au **repos** et à la contemplation sous la neige.',
+      tip: 'Variez votre ton selon le sentiment de chaque phrase. Les mots en jaune marquent les temps forts.',
       focus: 'Expressivité',
     },
     {
       id: 'e5',
       title: 'La lecture',
-      text: 'Lire est l\'une de mes activités préférées. Je lis tous les soirs avant de dormir pendant une demi-heure. J\'aime les romans policiers, les récits de voyage et parfois la poésie. Les livres m\'emmènent dans des mondes différents et élargissent ma vision des choses.',
-      tip: 'Lisez comme si vous racontiez une histoire à quelqu\'un.',
+      text: '**Lire** est l\'une de mes activités **préférées**. Je lis tous les **soirs** avant de dormir pendant une demi-heure. J\'aime les romans **policiers**, les récits de **voyage** et parfois la **poésie**. Les **livres** m\'emmènent dans des mondes différents et élargissent ma vision des choses.',
+      tip: 'Lisez comme si vous racontiez une histoire à quelqu\'un. Les mots en jaune marquent les temps forts.',
       focus: 'Narration naturelle',
     },
   ],
