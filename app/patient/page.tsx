@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, type CSSProperties } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { isPremium } from '@/app/lib/plan'
@@ -49,6 +49,32 @@ const DIFFICULTY_STYLE: Record<Difficulty, { bg: string; text: string; border: s
 
 const SCORE_COLOR = (s: number) =>
   s >= 75 ? '#197A4B' : s >= 50 ? '#A85A00' : '#A8261D'
+
+// Cadence du karaoké (ms par mot) — plus lent pour les niveaux faciles, plus rapide pour les exigeants.
+const RHYTHM_PACE_MS: Record<Difficulty, number> = {
+  debutant: 620,
+  elementaire: 460,
+  intermediaire: 380,
+  avance: 340,
+  expert: 300,
+}
+
+// Réglage de vitesse du karaoké : multiplicateur appliqué à la cadence de base du niveau.
+// 1 = vitesse normale du niveau · > 1 = plus rapide · < 1 = plus lent.
+// Paliers fins (~10 %) pour un réglage précis, de 50 % à 200 %.
+const SPEED_FACTORS = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.6, 1.8, 2.0] as const
+const DEFAULT_SPEED_INDEX = 5 // = 1.0 (vitesse normale du niveau)
+
+const speedBtnStyle = (disabled: boolean): CSSProperties => ({
+  width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+  background: disabled ? '#EEF2F8' : '#FFFFFF',
+  border: '1.5px solid #D6DEEA',
+  color: disabled ? '#9FB0C6' : '#1E5BB8',
+  fontSize: 26, fontWeight: 700, lineHeight: 1,
+  display: 'grid', placeItems: 'center',
+  cursor: disabled ? 'default' : 'pointer',
+  padding: 0,
+})
 
 function DifficultyBadge({ d }: { d: Difficulty }) {
   const st = DIFFICULTY_STYLE[d]
@@ -118,6 +144,7 @@ function PatientApp() {
   const [gamificationState, setGamificationState] = useState<GamificationState | null>(null)
   const [sessionReward, setSessionReward] = useState<SessionReward | null>(null)
   const [recorderState, setRecorderState] = useState<'idle' | 'recording' | 'processing'>('idle')
+  const [speedIndex, setSpeedIndex] = useState(DEFAULT_SPEED_INDEX)
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -499,10 +526,46 @@ function PatientApp() {
                 </div>
                 <RhythmText
                   text={exercise.text}
-                  wordDurationMs={460}
-                  active={difficulty === 'elementaire' && recorderState === 'recording'}
+                  wordDurationMs={Math.round(RHYTHM_PACE_MS[difficulty] / SPEED_FACTORS[speedIndex])}
+                  active={recorderState === 'recording'}
                 />
-                {difficulty === 'elementaire' && recorderState === 'idle' && (
+
+                {/* Réglage de la vitesse du rythme */}
+                <div style={{
+                  marginTop: 18, paddingTop: 16, borderTop: '1px solid #EEF2F8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setSpeedIndex((i) => Math.max(0, i - 1))}
+                    disabled={speedIndex === 0}
+                    aria-label="Ralentir le rythme"
+                    style={speedBtnStyle(speedIndex === 0)}
+                  >
+                    −
+                  </button>
+                  <div style={{ textAlign: 'center', minWidth: 110 }}>
+                    <div style={{
+                      fontFamily: 'var(--font-mono), JetBrains Mono, monospace',
+                      fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase',
+                      color: '#5B6B82', fontWeight: 700,
+                    }}>Vitesse</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: '#0E1B2C', marginTop: 2 }}>
+                      {Math.round(SPEED_FACTORS[speedIndex] * 100)} %
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSpeedIndex((i) => Math.min(SPEED_FACTORS.length - 1, i + 1))}
+                    disabled={speedIndex === SPEED_FACTORS.length - 1}
+                    aria-label="Accélérer le rythme"
+                    style={speedBtnStyle(speedIndex === SPEED_FACTORS.length - 1)}
+                  >
+                    +
+                  </button>
+                </div>
+
+                {recorderState === 'idle' && (
                   <p style={{
                     margin: '12px 0 0', fontSize: 13, color: '#5B6B82',
                     fontStyle: 'italic', textAlign: 'center',
