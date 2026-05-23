@@ -27,7 +27,9 @@ export default function RhythmText({ text, wordDurationMs, active }: RhythmTextP
 
   useEffect(() => {
     if (!active) { setIndex(-1); return }
-    setIndex(0)
+    // Démarre au 1er mot quand on (re)devient actif, mais conserve la position
+    // si seule la vitesse change en cours de lecture.
+    setIndex((i) => (i < 0 ? 0 : i))
     const id = setInterval(() => {
       setIndex((i) => {
         if (i + 1 >= tokens.length) { clearInterval(id); return i }
